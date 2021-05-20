@@ -4,7 +4,6 @@ const fs = require("fs");
 const { nanoid } = require("nanoid");
 const enmap = require("enmap");
 const db = new enmap({ name: "VideoPile DB" });
-let indexedVideos = [];
 
 app.listen(4242, () => {
   console.log("Listening!");
@@ -15,19 +14,14 @@ app.listen(4242, () => {
 app.use("/public", express.static("public"));
 
 async function indexVideos() {
-  if (!db.has("videos")) db.set("videos", []);
-  const content = fs
-    .readdirSync("./videos")
-    .filter((vid) => vid.endsWith(".mp4"));
-  indexedVideos = [];
-  content.map((file) => {
-    if (indexedVideos[0] && indexedVideos.some((video) => video == file))
-      return;
+  const dir = fs.readdirSync("./videos");
+  const videos = dir.filter((entry) => !entry.endsWith(".txt"));
+  let tempIndex = [];
+  videos.map((file) => {
     const title = (file.charAt(0).toUpperCase() + file.slice(1)).replace(
       /\.[^/.]+$/,
       ""
     );
-    indexedVideos.push(file);
     let description = "No Description Provided.";
     if (fs.existsSync(`./videos/${title.toLowerCase()}.txt`)) {
       const fileData = fs.readFileSync(`./videos/${title.toLowerCase()}.txt`, {
@@ -36,14 +30,19 @@ async function indexVideos() {
       });
       description = fileData;
     }
-    db.push("videos", {
+    tempIndex.push({
       title,
       description,
-      id: nanoid(8),
+      id:
+        db.has("videos") &&
+        db.get("videos").some((vid) => vid.fileName == file && vid.id)
+          ? db.get("videos").filter((entry) => entry.fileName == file)[0].id
+          : nanoid(10),
       fileName: file,
       ext: /(?:\.([^.]+))?$/.exec(file)[1],
     });
   });
+  return db.set("videos", tempIndex);
 }
 
 app.get("/", (req, res) => {
