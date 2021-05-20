@@ -1,0 +1,5 @@
+node_modules
+*.lock
+package-lock.jsons
+videos
+data

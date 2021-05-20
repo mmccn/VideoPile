@@ -1,0 +1,17 @@
+{
+  "name": "videopile",
+  "version": "1.0.0",
+  "description": "Serve your content, yourself.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "enmap": "^5.8.5",
+    "express": "^4.17.1",
+    "nanoid": "^3.1.23"
+  }
+}
